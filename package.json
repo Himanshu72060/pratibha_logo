@@ -10,14 +10,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-  "express": "...",
-  "mongoose": "...",
-  "multer": "...",
-  "cloudinary": "...",
-  "dotenv": "...",
-  "cors": "...",
-  "body-parser": "...",
-  "streamifier": "..."
+    "body-parser": "file:...",
+    "cloudinary": "file:...",
+    "cors": "file:...",
+    "dotenv": "file:...",
+    "express": "file:...",
+    "mongoose": "file:...",
+    "multer": "file:...",
+    "streamifier": "file:..."
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
