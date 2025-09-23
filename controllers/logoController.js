@@ -9,7 +9,6 @@ exports.createLogo = async (req, res) => {
         });
 
         const logo = new Logo({
-            name: req.body.name,
             image: result.secure_url,
         });
 
@@ -33,7 +32,6 @@ exports.getLogos = async (req, res) => {
 // ✅ Update Logo
 exports.updateLogo = async (req, res) => {
     try {
-        let updateData = { name: req.body.name };
 
         if (req.file) {
             const result = await cloudinary.uploader.upload(req.file.path, {
