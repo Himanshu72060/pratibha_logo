@@ -1,7 +1,11 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const bodyParser = require('body-parser');
 const connectDB = require("./config/db");
+
+
+const heroRoutes = require('./routes/heroRoutes');
 
 dotenv.config();
 const app = express();
@@ -15,6 +19,10 @@ connectDB();
 
 // Routes
 app.use("/api/logos", require("./routes/logoRoutes"));
+app.use('/api/hero', heroRoutes);
+
+app.get('/', (req, res) => res.send('Hero Slider API is running'));
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
