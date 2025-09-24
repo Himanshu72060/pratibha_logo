@@ -122,14 +122,13 @@ exports.updateHero = async (req, res) => {
     }
 };
 
-// Delete
+// Delete Hero
 exports.deleteHero = async (req, res) => {
     try {
         const hero = await HeroSlider.findById(req.params.id);
         if (!hero) return res.status(404).json({ message: 'Hero not found' });
 
-
-        // remove image from cloudinary
+        // Remove image from Cloudinary
         if (hero.image && hero.image.public_id) {
             try {
                 await cloudinary.uploader.destroy(hero.image.public_id);
@@ -138,10 +137,18 @@ exports.deleteHero = async (req, res) => {
             }
         }
 
-
+        // Remove hero document from MongoDB
         await hero.remove();
-        res.json({ message: 'Hero removed' });
+
+        // Frontend-friendly response
+        res.json({
+            message: 'Hero deleted successfully',
+            heroId: hero._id,
+            imageUrl: hero.image?.url || null
+        });
+
     } catch (error) {
+        console.error("Delete Hero Error:", error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
