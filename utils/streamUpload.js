@@ -1,21 +1,16 @@
-// helper to upload buffer using upload_stream
-const streamifier = require('streamifier');
+const streamifier = require("streamifier");
 
-
-const uploadFromBuffer = (cloudinary, buffer, folder = 'hero-slider') => {
+const uploadFromBuffer = (cloudinary, fileBuffer, folder) => {
     return new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
+        const stream = cloudinary.uploader.upload_stream(
             { folder },
             (error, result) => {
-                if (error) return reject(error);
-                resolve(result);
+                if (result) resolve(result);
+                else reject(error);
             }
         );
-
-
-        streamifier.createReadStream(buffer).pipe(uploadStream);
+        streamifier.createReadStream(fileBuffer).pipe(stream);
     });
 };
-
 
 module.exports = uploadFromBuffer;

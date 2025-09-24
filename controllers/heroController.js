@@ -1,33 +1,35 @@
-const HeroSlider = require('../models/HeroSlider');
-const cloudinary = require('../config/cloudinary');
-const uploadFromBuffer = require('../utils/streamUpload');
-
+const cloudinary = require("../config/cloudinary");
+const HeroSlider = require("../models/heroModel");
+const uploadFromBuffer = require("../utils/streamUpload");
 
 // Create
 exports.createHero = async (req, res) => {
     try {
-        if (!req.file) return res.status(400).json({ message: 'Image is required' });
+        if (!req.file) {
+            return res.status(400).json({ message: "Image is required" });
+        }
 
-
-        const result = await uploadFromBuffer(cloudinary, req.file.buffer, 'hero-slider');
-
+        const result = await uploadFromBuffer(cloudinary, req.file.buffer, "hero-slider");
 
         const hero = new HeroSlider({
             title: req.body.title,
             buttonText: req.body.buttonText,
             buttonLink: req.body.buttonLink,
             description: req.body.description,
-            image: { url: result.secure_url, public_id: result.public_id },
+            image: {
+                url: result.secure_url,
+                public_id: result.public_id,
+            },
         });
-
 
         await hero.save();
         res.status(201).json(hero);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error("Create Hero Error:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
     }
 };
+
 
 // Get all
 exports.getAllHeroes = async (req, res) => {
