@@ -1,5 +1,5 @@
 const cloudinary = require("../config/cloudinary");
-const HeroSlider = require("../models/heroModel");
+const HeroSlider = require("../models/HeroSlider");
 const uploadFromBuffer = require("../utils/streamUpload");
 
 // Create
