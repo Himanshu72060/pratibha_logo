@@ -72,12 +72,13 @@ exports.getHeroById = async (req, res) => {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
-// Update
+
+
+// Update Hero
 exports.updateHero = async (req, res) => {
     try {
         const hero = await HeroSlider.findById(req.params.id);
         if (!hero) return res.status(404).json({ message: 'Hero not found' });
-
 
         // Update text fields
         hero.title = req.body.title ?? hero.title;
@@ -85,10 +86,9 @@ exports.updateHero = async (req, res) => {
         hero.buttonLink = req.body.buttonLink ?? hero.buttonLink;
         hero.description = req.body.description ?? hero.description;
 
-
         // If new image provided, delete old from Cloudinary and upload new
         if (req.file) {
-            // delete old
+            // Delete old image
             if (hero.image && hero.image.public_id) {
                 try {
                     await cloudinary.uploader.destroy(hero.image.public_id);
@@ -97,16 +97,27 @@ exports.updateHero = async (req, res) => {
                 }
             }
 
-
+            // Upload new image to Cloudinary
             const result = await uploadFromBuffer(cloudinary, req.file.buffer, 'hero-slider');
             hero.image = { url: result.secure_url, public_id: result.public_id };
         }
 
-
         await hero.save();
-        res.json(hero);
+
+        // Response formatted for frontend
+        res.json({
+            id: hero._id,
+            title: hero.title,
+            buttonText: hero.buttonText,
+            buttonLink: hero.buttonLink,
+            description: hero.description,
+            imageUrl: hero.image?.url || null,
+            createdAt: hero.createdAt,
+            updatedAt: hero.updatedAt
+        });
+
     } catch (error) {
-        console.error(error);
+        console.error("Update Hero Error:", error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
