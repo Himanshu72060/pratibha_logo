@@ -2,12 +2,10 @@ const cloudinary = require("../config/cloudinary");
 const HeroSlider = require("../models/HeroSlider");
 const uploadFromBuffer = require("../utils/streamUpload");
 
-// Create
+// Create Hero
 exports.createHero = async (req, res) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({ message: "Image is required" });
-        }
+        if (!req.file) return res.status(400).json({ message: "Image is required" });
 
         const result = await uploadFromBuffer(cloudinary, req.file.buffer, "hero-slider");
 
@@ -17,8 +15,8 @@ exports.createHero = async (req, res) => {
             buttonLink: req.body.buttonLink,
             description: req.body.description,
             image: {
-                url: result.secure_url,
-                public_id: result.public_id,
+                url: result.secure_url,      // yahi URL website pe show hoga
+                public_id: result.public_id, // delete/update ke liye
             },
         });
 
@@ -30,28 +28,50 @@ exports.createHero = async (req, res) => {
     }
 };
 
-
-// Get all
+// Get all heroes
 exports.getAllHeroes = async (req, res) => {
     try {
         const heroes = await HeroSlider.find().sort({ createdAt: -1 });
-        res.json(heroes);
+
+        // Response cleanup (frontend ke liye)
+        const formatted = heroes.map(hero => ({
+            id: hero._id,
+            title: hero.title,
+            buttonText: hero.buttonText,
+            buttonLink: hero.buttonLink,
+            description: hero.description,
+            imageUrl: hero.image?.url || null,   // 👈 yahi frontend me use hoga
+            createdAt: hero.createdAt,
+            updatedAt: hero.updatedAt
+        }));
+
+        res.json(formatted);
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        res.status(500).json({ message: "Server error", error: error.message });
     }
 };
 
-// Get by id
+
+// Get hero by ID
 exports.getHeroById = async (req, res) => {
     try {
         const hero = await HeroSlider.findById(req.params.id);
-        if (!hero) return res.status(404).json({ message: 'Hero not found' });
-        res.json(hero);
+        if (!hero) return res.status(404).json({ message: "Hero not found" });
+
+        res.json({
+            id: hero._id,
+            title: hero.title,
+            buttonText: hero.buttonText,
+            buttonLink: hero.buttonLink,
+            description: hero.description,
+            imageUrl: hero.image?.url || null,   // 👈 direct image link
+            createdAt: hero.createdAt,
+            updatedAt: hero.updatedAt
+        });
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        res.status(500).json({ message: "Server error", error: error.message });
     }
 };
-
 // Update
 exports.updateHero = async (req, res) => {
     try {

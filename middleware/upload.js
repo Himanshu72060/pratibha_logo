@@ -1,9 +1,11 @@
 const multer = require("multer");
 const path = require("path");
 
-const storage = multer.diskStorage({});
+// Memory storage (buffer ke liye)
+const storage = multer.memoryStorage();
+
 const fileFilter = (req, file, cb) => {
-    let ext = path.extname(file.originalname);
+    let ext = path.extname(file.originalname).toLowerCase();
     if (ext !== ".jpg" && ext !== ".jpeg" && ext !== ".png") {
         cb(new Error("Only images are allowed"), false);
         return;
