@@ -122,26 +122,34 @@ exports.updateHero = async (req, res) => {
     }
 };
 
-// Delete
 exports.deleteHero = async (req, res) => {
     try {
         const hero = await HeroSlider.findById(req.params.id);
         if (!hero) return res.status(404).json({ message: 'Hero not found' });
 
-
-        // remove image from cloudinary
+        // Delete image from Cloudinary
         if (hero.image && hero.image.public_id) {
             try {
-                await cloudinary.uploader.destroy(hero.image.public_id);
+                const result = await cloudinary.uploader.destroy(hero.image.public_id);
+                if (result.result !== "ok" && result.result !== "not found") {
+                    console.warn('Failed to delete image from Cloudinary:', result);
+                }
             } catch (err) {
                 console.warn('Failed to delete image from Cloudinary:', err.message);
             }
         }
 
+        // Delete hero document
+        await HeroSlider.deleteOne({ _id: hero._id });
 
-        await hero.remove();
-        res.json({ message: 'Hero removed' });
+        res.json({
+            message: 'Hero deleted successfully',
+            heroId: hero._id,
+            imageUrl: hero.image?.url || null
+        });
+
     } catch (error) {
+        console.error("Delete Hero Error:", error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
