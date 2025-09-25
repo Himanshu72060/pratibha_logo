@@ -68,15 +68,9 @@ exports.updateService = async (req, res) => {
 // Delete Service
 exports.deleteService = async (req, res) => {
     try {
-        const service = await Service.findById(req.params.id);
-        if (!service) return res.status(404).json({ error: 'Service not found' });
-
-        // Optional: delete image from Cloudinary (needs public_id)
-        // await cloudinary.uploader.destroy(service.public_id);
-
-        await service.remove();
-        res.status(200).json({ message: 'Service deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+        await Logo.findByIdAndDelete(req.params.id);
+        res.json({ message: "Logo deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 };
