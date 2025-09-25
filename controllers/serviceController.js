@@ -10,7 +10,8 @@ exports.createService = async (req, res) => {
             return res.status(400).json({ error: 'Image is required' });
         }
 
-        // Upload buffer to Cloudinary
+        // Cloudinary upload using buffer
+        const streamifier = require('streamifier');
         const streamUpload = (buffer) => {
             return new Promise((resolve, reject) => {
                 const stream = cloudinary.uploader.upload_stream(
@@ -37,6 +38,7 @@ exports.createService = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 // Get All Services
 exports.getServices = async (req, res) => {
