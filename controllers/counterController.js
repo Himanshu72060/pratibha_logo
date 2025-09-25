@@ -2,22 +2,24 @@ const Service = require('../models/Service');
 const cloudinary = require('../config/cloudinary');
 const streamifier = require('streamifier');
 const fs = require("fs");
+const e = require('express');
 
 // Create Counter
 exports.createCounter = async (req, res) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({ error: "Image is required" });
-        }
+        let imageUrl = "";
 
-        const result = await cloudinary.uploader.upload(req.file.path, {
-            folder: "counters",
-        });
+        if (req.file) {
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: "counters",
+            });
+            imageUrl = result.secure_url;
+        }
 
         const counter = await Counter.create({
             name: req.body.name,
             number: req.body.number,
-            image: result.secure_url,
+            image: imageUrl,
         });
 
         fs.unlinkSync(req.file.path); // remove temp file
@@ -27,8 +29,8 @@ exports.createCounter = async (req, res) => {
     }
 };
 
-// Get All Counters
-exports.getCounters = async (req, res) => {
+// get all counters
+exports.getAllCounters = async (req, res) => {
     try {
         const counters = await Counter.find();
         res.status(200).json(counters);
@@ -37,8 +39,19 @@ exports.getCounters = async (req, res) => {
     }
 };
 
-// Update Counter
-exports.updateCounter = async (req, res) => {
+// get single counter
+exports.getSingleCounter = async (req, res) => {
+    try {
+        const counter = await Counter.findById(req.params.id);
+        if (!counter) return res.status(404).json({ error: "Counter not found" });
+        res.status(200).json(counter);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};  
+
+// update counter
+exports.updateSingleCounter = async (req, res) => {
     try {
         const counter = await Counter.findById(req.params.id);
         if (!counter) return res.status(404).json({ error: "Counter not found" });
@@ -62,12 +75,12 @@ exports.updateCounter = async (req, res) => {
     }
 };
 
-// Delete Counter
-exports.deleteCounter = async (req, res) => {
+
+// delete counter
+exports.deleteSingleCounter = async (req, res) => {
     try {
         const counter = await Counter.findById(req.params.id);
         if (!counter) return res.status(404).json({ error: "Counter not found" });
-
         await counter.remove();
         res.status(200).json({ message: "Counter deleted successfully" });
     } catch (error) {
