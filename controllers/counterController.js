@@ -1,88 +1,74 @@
 const Counter = require("../models/counterModel");
 const cloudinary = require('../config/cloudinary');
-const streamifier = require('streamifier');
 const fs = require("fs");
 
 // Create Counter
-exports.createCounter = async (req, res) => {
+const createCounter = async (req, res) => {
     try {
-        let imageUrl = "";
+        const { title, value } = req.body;
+        let imageUrl = "";  // Initialize imageUrl
 
+        // Handle image upload if file is provided          
         if (req.file) {
             const result = await cloudinary.uploader.upload(req.file.path, {
-                folder: "counters",
+                folder: 'counters', // Optional: specify a folder in Cloudinary
             });
             imageUrl = result.secure_url;
+            // Remove the file from local uploads folder after upload
+            fs.unlinkSync(req.file.path);
         }
-
-        const counter = await Counter.create({
-            name: req.body.name,
-            number: req.body.number,
-            image: imageUrl,
-        });
-
-        fs.unlinkSync(req.file.path); // remove temp file
-        res.status(201).json(counter);
+        const newCounter = new Counter({ title, value, image: imageUrl });
+        await newCounter.save();
+        res.status(201).json(newCounter);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 
-// get all counters
-exports.getAllCounters = async (req, res) => {
+// Get All Counters
+const getCounters = async (req, res) => {
     try {
         const counters = await Counter.find();
         res.status(200).json(counters);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 
-// get single counter
-exports.getSingleCounter = async (req, res) => {
+// Update Counter
+const updateCounter = async (req, res) => {
     try {
-        const counter = await Counter.findById(req.params.id);
-        if (!counter) return res.status(404).json({ error: "Counter not found" });
-        res.status(200).json(counter);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
-
-// update counter
-exports.updateSingleCounter = async (req, res) => {
-    try {
-        const counter = await Counter.findById(req.params.id);
-        if (!counter) return res.status(404).json({ error: "Counter not found" });
-
-        // Update image if file exists
+        const { id } = req.params;
+        const { title, value } = req.body;
+        let updatedData = { title, value };
+        // Handle image upload if file is provided
         if (req.file) {
             const result = await cloudinary.uploader.upload(req.file.path, {
-                folder: "counters",
+                folder: 'counters', // Optional: specify a folder in Cloudinary
             });
-            counter.image = result.secure_url;
+            updatedData.image = result.secure_url;
+            // Remove the file from local uploads folder after upload
             fs.unlinkSync(req.file.path);
         }
-
-        counter.name = req.body.name || counter.name;
-        counter.number = req.body.number || counter.number;
-
-        await counter.save();
-        res.status(200).json(counter);
+        await Counter.findByIdAndUpdate(id, updatedData, { new: true });
+        res.status(200).json({ message: "Counter updated successfully" });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
-
-
-// delete counter
-exports.deleteSingleCounter = async (req, res) => {
-    try {
-        const counter = await Counter.findById(req.params.id);
-        if (!counter) return res.status(404).json({ error: "Counter not found" });
-        await counter.remove();
+// Delete Counter
+const deleteCounter = async (req, res) => {
+    try {   
+        const { id } = req.params;
+        await Counter.findByIdAndDelete(id);
         res.status(200).json({ message: "Counter deleted successfully" });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: error.message });
     }
+};
+module.exports = {
+    createCounter,
+    getCounters,
+    updateCounter,
+    deleteCounter
 };
