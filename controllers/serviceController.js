@@ -6,39 +6,21 @@ const streamifier = require('streamifier');
 // Create Service
 exports.createService = async (req, res) => {
     try {
-        if (!req.file || !req.file.buffer) {
-            return res.status(400).json({ error: 'Image is required' });
-        }
-
-        // Cloudinary upload using buffer
-        const streamifier = require('streamifier');
-        const streamUpload = (buffer) => {
-            return new Promise((resolve, reject) => {
-                const stream = cloudinary.uploader.upload_stream(
-                    { folder: 'services' },
-                    (error, result) => {
-                        if (result) resolve(result);
-                        else reject(error);
-                    }
-                );
-                streamifier.createReadStream(buffer).pipe(stream);
-            });
-        };
-
-        const result = await streamUpload(req.file.buffer);
-
-        const service = await Service.create({
-            name: req.body.name,
-            image: result.secure_url
+        const result = await cloudinary.uploader.upload(req.file.path, {
+            folder: "Services",
         });
 
+        const service = new Service({
+            name: req.body.name,
+            image: result.secure_url,
+        });
+
+        await service.save();
         res.status(201).json(service);
-    } catch (error) {
-        console.error("Error in createService:", error);
-        res.status(500).json({ error: error.message });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 };
-
 
 // Get All Services
 exports.getServices = async (req, res) => {
