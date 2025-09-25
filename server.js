@@ -7,6 +7,7 @@ const connectDB = require("./config/db");
 
 const heroRoutes = require('./routes/heroRoutes');
 const serviceRoutes = require("./routes/serviceRoutes");
+const counterRoutes = require("./routes/counterRoutes");
 
 dotenv.config();
 const app = express();
@@ -14,6 +15,8 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Connect DB
 connectDB();
@@ -22,6 +25,7 @@ connectDB();
 app.use("/api/logos", require("./routes/logoRoutes"));
 app.use('/api/hero', heroRoutes);
 app.use("/api/services", serviceRoutes);
+app.use("/api/counters", counterRoutes);
 
 app.get('/', (req, res) => res.send('Hero Slider API is running'));
 
