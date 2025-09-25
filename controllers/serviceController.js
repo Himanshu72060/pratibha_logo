@@ -68,8 +68,8 @@ exports.updateService = async (req, res) => {
 // Delete Service
 exports.deleteService = async (req, res) => {
     try {
-        await Logo.findByIdAndDelete(req.params.id);
-        res.json({ message: "Logo deleted successfully" });
+        await Service.findByIdAndDelete(req.params.id);
+        res.json({ message: "Service deleted successfully" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
