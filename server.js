@@ -6,6 +6,7 @@ const connectDB = require("./config/db");
 
 
 const heroRoutes = require('./routes/heroRoutes');
+const serviceRoutes = require("./routes/serviceRoutes");
 
 dotenv.config();
 const app = express();
@@ -20,6 +21,7 @@ connectDB();
 // Routes
 app.use("/api/logos", require("./routes/logoRoutes"));
 app.use('/api/hero', heroRoutes);
+app.use("/api/services", serviceRoutes);
 
 app.get('/', (req, res) => res.send('Hero Slider API is running'));
 
