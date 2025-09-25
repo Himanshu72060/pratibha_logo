@@ -1,18 +1,9 @@
 const Service = require('../models/Service');
-const cloudinary = require('cloudinary').v2;
-
-// Configure Cloudinary
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
-});
+const cloudinary = require('../config/cloudinary');
 
 // Create Service
 exports.createService = async (req, res) => {
     try {
-        console.log("Body:", req.body);
-        console.log("File:", req.file);
 
         if (!req.file) return res.status(400).json({ error: 'Image is required' });
 
