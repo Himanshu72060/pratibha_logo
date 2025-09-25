@@ -67,11 +67,8 @@ exports.updateRecruiter = async (req, res) => {
 // Delete recruiter
 exports.deleteRecruiter = async (req, res) => {
     try {
-        const recruiter = await Recruiter.findById(req.params.id);
-        if (!recruiter) return res.status(404).json({ error: "Recruiter not found" });
-
-        await recruiter.remove();
-        res.status(200).json({ message: "Recruiter deleted successfully" });
+        await Recruiter.findByIdAndDelete(req.params.id);
+        res.json({ message: "Recruiter deleted successfully" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
