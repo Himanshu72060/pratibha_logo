@@ -6,10 +6,6 @@ const fs = require("fs");
 // Create Recruiter
 exports.createRecruiter = async (req, res) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({ error: "Image is required" });
-        }
-
         const result = await cloudinary.uploader.upload(req.file.path, {
             folder: "prime_recruiters",
         });
@@ -19,10 +15,6 @@ exports.createRecruiter = async (req, res) => {
         });
 
         await recruiter.save();
-
-        // Delete local file
-        fs.unlinkSync(req.file.path);
-
         res.status(201).json(recruiter);
     } catch (err) {
         res.status(500).json({ error: err.message });

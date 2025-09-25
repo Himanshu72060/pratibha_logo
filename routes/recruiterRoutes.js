@@ -11,16 +11,10 @@ const {
     deleteRecruiter,
 } = require("../controllers/recruiterController");
 
-// Multer config
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "uploads/");
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
-    },
-});
+// Multer setup for file upload
+const storage = multer.diskStorage({});
 const upload = multer({ storage });
+
 
 // Routes
 router.post("/", upload.single("image"), createRecruiter);
