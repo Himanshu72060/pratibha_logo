@@ -1,12 +1,5 @@
 const Partner = require('../models/partnerModel');
-const cloudinary = require('cloudinary').v2;
-
-// Cloudinary config
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+const cloudinary = require('../config/cloudinary');
 
 // CREATE Partner
 exports.createPartner = async (req, res) => {
@@ -58,9 +51,6 @@ exports.updatePartner = async (req, res) => {
         const partner = await Partner.findById(req.params.id);
         if (!partner) return res.status(404).json({ error: 'Partner not found' });
 
-        // Update name if provided
-        if (req.body.name) partner.name = req.body.name;
-
         // Update image if new file uploaded
         if (req.file) {
             const result = await cloudinary.uploader.upload_stream(
@@ -92,3 +82,4 @@ exports.deletePartner = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
