@@ -1,15 +1,16 @@
 const Service = require('../models/Service');
 const cloudinary = require('../config/cloudinary');
+const streamifier = require('streamifier');
+
 
 // Create Service
 exports.createService = async (req, res) => {
     try {
+        if (!req.file || !req.file.buffer) {
+            return res.status(400).json({ error: 'Image is required' });
+        }
 
-        if (!req.file) return res.status(400).json({ error: 'Image is required' });
-
-        // Upload using buffer
-        const streamifier = require('streamifier');
-
+        // Upload buffer to Cloudinary
         const streamUpload = (buffer) => {
             return new Promise((resolve, reject) => {
                 const stream = cloudinary.uploader.upload_stream(
