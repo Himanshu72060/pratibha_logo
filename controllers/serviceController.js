@@ -11,14 +11,28 @@ cloudinary.config({
 // Create Service
 exports.createService = async (req, res) => {
     try {
-        console.log("Incoming body:", req.body);
-        console.log("Incoming file:", req.file);
+        console.log("Body:", req.body);
+        console.log("File:", req.file);
 
-        if (!req.file) {
-            return res.status(400).json({ error: 'Image is required, got nothing' });
-        }
+        if (!req.file) return res.status(400).json({ error: 'Image is required' });
 
-        const result = await cloudinary.uploader.upload(req.file.path, { folder: 'services' });
+        // Upload using buffer
+        const streamifier = require('streamifier');
+
+        const streamUpload = (buffer) => {
+            return new Promise((resolve, reject) => {
+                const stream = cloudinary.uploader.upload_stream(
+                    { folder: 'services' },
+                    (error, result) => {
+                        if (result) resolve(result);
+                        else reject(error);
+                    }
+                );
+                streamifier.createReadStream(buffer).pipe(stream);
+            });
+        };
+
+        const result = await streamUpload(req.file.buffer);
 
         const service = await Service.create({
             name: req.body.name,
@@ -27,7 +41,7 @@ exports.createService = async (req, res) => {
 
         res.status(201).json(service);
     } catch (error) {
-        console.error("❌ Error in createService:", error);
+        console.error("Error in createService:", error);
         res.status(500).json({ error: error.message });
     }
 };
