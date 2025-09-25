@@ -8,6 +8,8 @@ const connectDB = require("./config/db");
 const heroRoutes = require('./routes/heroRoutes');
 const serviceRoutes = require("./routes/serviceRoutes");
 const counterRoutes = require("./routes/counterRoutes");
+const partnerRoutes = require('./routes/partnerRoutes');
+
 
 dotenv.config();
 const app = express();
@@ -26,6 +28,8 @@ app.use("/api/logos", require("./routes/logoRoutes"));
 app.use('/api/hero', heroRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/counters", counterRoutes);
+app.use('/api/partners', partnerRoutes);
+
 
 app.get('/', (req, res) => res.send('Hero Slider API is running'));
 
