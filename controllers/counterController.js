@@ -1,8 +1,7 @@
-const Service = require('../models/Service');
+const Counter = require("../models/counterModel");
 const cloudinary = require('../config/cloudinary');
 const streamifier = require('streamifier');
 const fs = require("fs");
-const e = require('express');
 
 // Create Counter
 exports.createCounter = async (req, res) => {
@@ -48,7 +47,7 @@ exports.getSingleCounter = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-};  
+};
 
 // update counter
 exports.updateSingleCounter = async (req, res) => {
