@@ -15,34 +15,30 @@ const removeTmpFile = (path) => {
 exports.createAbout = async (req, res) => {
     try {
         const { title, description } = req.body;
-        if (!req.file) return res.status(400).json({ error: 'Image is required' });
-
-
-        // upload to cloudinary
+        if (!title || !description) {
+            return res.status(400).json({ error: 'Title and Description are required' });
+        }
+        if (!req.file) {
+            return res.status(400).json({ error: 'Image is required' });
+        }
         const result = await cloudinary.uploader.upload(req.file.path, {
             folder: 'about_images',
         });
-
-
         // remove tmp file
         removeTmpFile(req.file.path);
-
-
         const about = new About({
             title,
             description,
-            image: { url: result.secure_url, public_id: result.public_id }
+            image: { url: result.secure_url, public_id: result.public_id },
         });
-
-
         await about.save();
         res.status(201).json({ success: true, data: about });
-    } catch (err) {
-        console.error('Create About Error:', err);
+    }
+    catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Server error' });
     }
 };
-
 
 exports.getAllAbout = async (req, res) => {
     try {
