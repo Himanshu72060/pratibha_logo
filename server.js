@@ -11,6 +11,7 @@ const counterRoutes = require("./routes/counterRoutes");
 const partnerRoutes = require('./routes/partnerRoutes');
 const recruiterRoutes = require("./routes/recruiterRoutes");
 const highlightRoutes = require('./routes/highlightRoutes');
+const aboutRoutes = require('./routes/aboutRoutes');
 
 
 
@@ -34,6 +35,7 @@ app.use("/api/counters", counterRoutes);
 app.use('/api/partners', partnerRoutes);
 app.use("/api/recruiters", recruiterRoutes);
 app.use('/api/highlights', highlightRoutes);
+app.use('/api/about', aboutRoutes);
 
 
 
