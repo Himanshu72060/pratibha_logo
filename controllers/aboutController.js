@@ -2,6 +2,8 @@
 const About = require('../models/About');
 const cloudinary = require('../config/cloudinary');
 const fs = require('fs');
+const streamifier = require('streamifier');
+
 
 
 // Helper to remove temp file
@@ -17,16 +19,20 @@ exports.createAbout = async (req, res) => {
         const { title, description } = req.body;
         if (!req.file) return res.status(400).json({ error: 'Image is required' });
 
+        const streamUpload = (req) => {
+            return new Promise((resolve, reject) => {
+                let stream = cloudinary.uploader.upload_stream(
+                    { folder: 'about_images' },
+                    (error, result) => {
+                        if (result) resolve(result);
+                        else reject(error);
+                    }
+                );
+                streamifier.createReadStream(req.file.buffer).pipe(stream);
+            });
+        };
 
-        // upload to cloudinary
-        const result = await cloudinary.uploader.upload(req.file.path, {
-            folder: 'about_images',
-        });
-
-
-        // remove tmp file
-        removeTmpFile(req.file.path);
-
+        const result = await streamUpload(req);
 
         const about = new About({
             title,
@@ -34,12 +40,11 @@ exports.createAbout = async (req, res) => {
             image: { url: result.secure_url, public_id: result.public_id }
         });
 
-
         await about.save();
         res.status(201).json({ success: true, data: about });
     } catch (err) {
-        console.error('Create About Error:', err);
-        res.status(500).json({ error: 'Server error' });
+        console.error('Create About Error:', err.message);
+        res.status(500).json({ error: err.message });
     }
 };
 
