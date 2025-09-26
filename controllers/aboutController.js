@@ -69,29 +69,34 @@ exports.getAbout = async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 };
+
 exports.updateAbout = async (req, res) => {
     try {
-        const about = await About.findById(req.params.id);
+        const { title, description } = req.body;
+        let about = await About.findById(req.params.id);
         if (!about) return res.status(404).json({ error: 'Not found' });
-        if (req.body.title) about.title = req.body.title;
-        if (req.body.description) about.description = req.body.description;
+
+        // Agar new file aayi hai to hi Cloudinary pe upload karo
         if (req.file) {
-            // delete old image from cloudinary
+            // old image delete
             await cloudinary.uploader.destroy(about.image.public_id);
-            // upload new image to cloudinary
+
+            // new image upload
             const result = await cloudinary.uploader.upload(req.file.path, {
                 folder: 'about_images',
             });
-            // remove tmp file
-            removeTmpFile(req.file.path);
+
             about.image = { url: result.secure_url, public_id: result.public_id };
         }
+
+        if (title) about.title = title;
+        if (description) about.description = description;
 
         await about.save();
         res.json({ success: true, data: about });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Server error' });
+        console.error('Update About Error:', err.message);
+        res.status(500).json({ error: err.message });
     }
 };
 
@@ -99,13 +104,16 @@ exports.deleteAbout = async (req, res) => {
     try {
         const about = await About.findById(req.params.id);
         if (!about) return res.status(404).json({ error: 'Not found' });
+
         // delete image from cloudinary
         await cloudinary.uploader.destroy(about.image.public_id);
-        await about.remove();
+
+        // delete from Mongo
+        await About.deleteOne({ _id: about._id });
+
         res.json({ success: true, message: 'Deleted' });
-    }
-    catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Server error' });
+    } catch (err) {
+        console.error('Delete About Error:', err.message);
+        res.status(500).json({ error: err.message });
     }
 };
