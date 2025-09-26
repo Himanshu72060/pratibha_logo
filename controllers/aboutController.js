@@ -79,34 +79,41 @@ exports.updateAbout = async (req, res) => {
         const about = await About.findById(id);
         if (!about) return res.status(404).json({ error: "About not found" });
 
-        // agar nayi image bheji gayi hai
+        // Agar nayi image bheji gayi hai
         if (req.file) {
             // Purani image delete karo
             if (about.image && about.image.public_id) {
                 await cloudinary.uploader.destroy(about.image.public_id);
             }
 
-            // Nayi image upload karo
-            const result = await cloudinary.uploader.upload_stream(
-                { folder: "about_images" },
-                async (error, uploadResult) => {
-                    if (error) return res.status(500).json({ error: "Image upload failed" });
+            // Nayi image upload karo (Promise wrap kiya so async/await chale)
+            const uploadResult = await new Promise((resolve, reject) => {
+                const stream = cloudinary.uploader.upload_stream(
+                    { folder: "about_images" },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                );
+                stream.end(req.file.buffer); // file buffer bhejna zaroori hai
+            });
 
-                    about.title = title || about.title;
-                    about.description = description || about.description;
-                    about.image = {
-                        url: uploadResult.secure_url,
-                        public_id: uploadResult.public_id
-                    };
-
-                    const updated = await about.save();
-                    res.json(updated);
-                }
-            );
+            about.image = {
+                url: uploadResult.secure_url,
+                public_id: uploadResult.public_id
+            };
         }
-    } catch (err) {
-        console.error('Update About Error:', err.message);
-        res.status(500).json({ error: err.message });
+
+        // Text fields update karo
+        about.title = title || about.title;
+        about.description = description || about.description;
+
+        const updated = await about.save();
+        res.json(updated);
+
+    } catch (error) {
+        console.error("Update About Error:", error);
+        res.status(500).json({ error: "Server error" });
     }
 };
 
