@@ -2,19 +2,13 @@
 const Course = require('../models/Course');
 const { cloudinary } = require('../config/cloudinaryConfig');
 
-// buffer ko Cloudinary pe bhejne ke liye function
-const uploadBufferToCloudinary = (buffer, folder) => {
+// helper to upload a buffer to Cloudinary using streamifier
+const uploadBufferToCloudinary = (buffer, folder = 'courses') => {
     return new Promise((resolve, reject) => {
-        let stream = cloudinary.uploader.upload_stream(
-            { folder },
-            (error, result) => {
-                if (result) {
-                    resolve(result);
-                } else {
-                    reject(error);
-                }
-            }
-        );
+        const stream = cloudinary.uploader.upload_stream({ folder }, (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+        });
         streamifier.createReadStream(buffer).pipe(stream);
     });
 };
