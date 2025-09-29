@@ -14,15 +14,17 @@ const cpUpload = upload.fields([
     { name: 'image', maxCount: 1 },
 ]);
 
-
-router.post(
-    "/",
-    upload.fields([
-        { name: "image", maxCount: 1 },
-        { name: "imageCategory", maxCount: 1 },
-    ]),
-    courseController.createCourse
-); router.get('/', courseController.getCourses);
+// ✅ Router: Create a new course
+router.post('/', cpUpload, courseController.createCourse);
+// router.post(
+//     "/",
+//     upload.fields([
+//         { name: "image", maxCount: 1 },
+//         { name: "imageCategory", maxCount: 1 },
+//     ]),
+//     courseController.createCourse
+// ); 
+router.get('/', courseController.getCourses);
 router.get('/:id', courseController.getCourse);
 router.put('/:id', cpUpload, courseController.updateCourse);
 router.delete('/:id', courseController.deleteCourse);

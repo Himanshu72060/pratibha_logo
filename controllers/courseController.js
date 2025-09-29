@@ -3,8 +3,8 @@ const Course = require('../models/Course');
 const { cloudinary } = require('../config/cloudinaryConfig');
 const streamifier = require('streamifier');
 
-// helper to upload a buffer to Cloudinary using streamifier
-const uploadBufferToCloudinary = (buffer, folder = 'courses') => {
+// helper: upload buffer to Cloudinary
+const uploadBufferToCloudinary = (buffer, folder) => {
     return new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream({ folder }, (error, result) => {
             if (error) return reject(error);
@@ -14,39 +14,54 @@ const uploadBufferToCloudinary = (buffer, folder = 'courses') => {
     });
 };
 
-// Create Course
-exports.createCourse = async (req, res) => {
+// ✅ POST controller
+exports.createCourse = async (req, res, next) => {
     try {
         const { categoryName, category, title, description, duration, price } = req.body;
 
-        let imageResult, imageCategoryResult;
-
-        if (req.files && req.files.image && req.files.image[0]) {
-            imageResult = await uploadBufferToCloudinary(req.files.image[0].buffer, "courses");
+        if (!categoryName || !category || !title) {
+            return res.status(400).json({ success: false, message: 'categoryName, category and title are required' });
         }
 
-        if (req.files && req.files.imageCategory && req.files.imageCategory[0]) {
-            imageCategoryResult = await uploadBufferToCloudinary(req.files.imageCategory[0].buffer, "courseCategories");
-        }
-
+        // new course object
         const course = new Course({
             categoryName,
             category,
             title,
             description,
             duration,
-            price,
-            image: imageResult?.secure_url || "",
-            imageCategory: imageCategoryResult?.secure_url || "",
+            price
         });
 
+        // handle imageCategory upload
+        if (req.files && req.files.imageCategory && req.files.imageCategory[0]) {
+            const file = req.files.imageCategory[0];
+            const result = await uploadBufferToCloudinary(file.buffer, 'courses/imageCategory');
+            course.imageCategory = { url: result.secure_url, public_id: result.public_id };
+        }
+
+        // handle image upload
+        if (req.files && req.files.image && req.files.image[0]) {
+            const file = req.files.image[0];
+            const result = await uploadBufferToCloudinary(file.buffer, 'courses/image');
+            course.image = { url: result.secure_url, public_id: result.public_id };
+        }
+
+        // save in DB
         await course.save();
-        res.status(201).json(course);
-    } catch (error) {
-        console.error("Create Course Error:", error);
-        res.status(500).json({ message: "Server Error", error });
+
+        res.status(201).json({
+            success: true,
+            message: 'Course created successfully',
+            data: course
+        });
+    } catch (err) {
+        console.error('Create Course Error:', err);
+        res.status(500).json({ success: false, message: 'Server error', error: err.message });
     }
 };
+
+
 // @desc Get all courses
 exports.getCourses = async (req, res, next) => {
     try {
