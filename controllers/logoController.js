@@ -2,7 +2,6 @@ const Logo = require("../models/Logo");
 const cloudinary = require("../config/cloudinary");
 
 // ✅ Create Logo
-// POST - Add new logo
 exports.createLogo = async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ error: "Image is required" });
