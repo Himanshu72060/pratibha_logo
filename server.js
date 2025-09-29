@@ -35,7 +35,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 connectDB();
 
 // Routes
-app.use("/api/logos", require("./routes/logoRoutes"));
+app.use("/api/logos", logo);
 app.use('/api/hero', heroRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/counters", counterRoutes);
