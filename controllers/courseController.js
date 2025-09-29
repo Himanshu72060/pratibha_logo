@@ -1,6 +1,7 @@
 // controllers/courseController.js
 const Course = require('../models/Course');
 const { cloudinary } = require('../config/cloudinaryConfig');
+const streamifier = require('streamifier');
 
 // helper to upload a buffer to Cloudinary using streamifier
 const uploadBufferToCloudinary = (buffer, folder = 'courses') => {
