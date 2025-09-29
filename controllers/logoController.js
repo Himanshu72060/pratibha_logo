@@ -34,23 +34,30 @@ exports.getLogos = async (req, res) => {
 };
 
 // ✅ Update Logo
+// PUT - Update logo
 exports.updateLogo = async (req, res) => {
     try {
+        const { id } = req.params;
+        const logo = await Logo.findById(id);
+        if (!logo) return res.status(404).json({ error: "Logo not found" });
 
         if (req.file) {
+            // Delete old image from Cloudinary
+            await cloudinary.uploader.destroy(logo.image.public_id);
+
+            // Upload new image
             const result = await cloudinary.uploader.upload(req.file.path, {
                 folder: "logos",
             });
-            updateData.image = result.secure_url;
+            logo.image = { public_id: result.public_id, url: result.secure_url };
         }
 
-        const logo = await Logo.findByIdAndUpdate(req.params.id, updateData, {
-            new: true,
-        });
+        if (req.body.name) logo.name = req.body.name;
 
-        res.json(logo);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+        await logo.save();
+        res.status(200).json(logo);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };
 
