@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const connectDB = require("./config/db");
 const { initCloudinary } = require('./config/cloudinaryConfig');
 
-
+const Logo = require("./models/Logo");
 const heroRoutes = require('./routes/heroRoutes');
 const serviceRoutes = require("./routes/serviceRoutes");
 const counterRoutes = require("./routes/counterRoutes");
