@@ -34,7 +34,6 @@ exports.getLogos = async (req, res) => {
 };
 
 // ✅ Update Logo
-// PUT - Update logo
 exports.updateLogo = async (req, res) => {
     try {
         const { id } = req.params;
@@ -51,8 +50,6 @@ exports.updateLogo = async (req, res) => {
             });
             logo.image = { public_id: result.public_id, url: result.secure_url };
         }
-
-        if (req.body.name) logo.name = req.body.name;
 
         await logo.save();
         res.status(200).json(logo);
