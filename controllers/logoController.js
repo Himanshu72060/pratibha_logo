@@ -42,21 +42,31 @@ exports.updateLogo = async (req, res) => {
     try {
         const { id } = req.params;
         const logo = await Logo.findById(id);
-        if (!logo) return res.status(404).json({ error: "Logo not found" });
-
-        if (req.file) {
-            // Delete old image from Cloudinary
-            await cloudinary.uploader.destroy(logo.image.public_id);
-
-            // Upload new image
-            const result = await cloudinary.uploader.upload(req.file.path, {
-                folder: "logos",
-            });
-            logo.image = { public_id: result.public_id, url: result.secure_url };
+        if (!logo) {
+            return res.status(404).json({ error: "Logo not found" });
         }
 
+        if (!req.file) {
+            return res.status(400).json({ error: "New image is required" });
+        }
+
+        // Delete old image from Cloudinary
+        await cloudinary.uploader.destroy(logo.image.public_id);
+
+        // Upload new image
+        const result = await cloudinary.uploader.upload(req.file.path, {
+            folder: "logos",
+        });
+
+        // Update with new image
+        logo.image = { public_id: result.public_id, url: result.secure_url };
+
         await logo.save();
-        res.status(200).json(logo);
+
+        res.status(200).json({
+            message: "Logo updated successfully",
+            logo,
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
