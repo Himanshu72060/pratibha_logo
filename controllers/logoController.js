@@ -4,7 +4,9 @@ const cloudinary = require("../config/cloudinary");
 // ✅ Create Logo
 exports.createLogo = async (req, res) => {
     try {
-        if (!req.file) return res.status(400).json({ error: "Image is required" });
+        if (!req.file) {
+            return res.status(400).json({ error: "Image is required" });
+        }
 
         // Upload image to Cloudinary
         const result = await cloudinary.uploader.upload(req.file.path, {
@@ -15,7 +17,10 @@ exports.createLogo = async (req, res) => {
             image: { public_id: result.public_id, url: result.secure_url },
         });
 
-        res.status(201).json(logo);
+        res.status(201).json({
+            message: "Logo uploaded successfully",
+            logo,
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
