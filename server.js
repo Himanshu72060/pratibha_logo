@@ -13,7 +13,7 @@ const partnerRoutes = require('./routes/partnerRoutes');
 const recruiterRoutes = require("./routes/recruiterRoutes");
 const highlightRoutes = require('./routes/highlightRoutes');
 const aboutRoutes = require('./routes/aboutRoutes');
-const categoryRoutes = require('./routes/categoryRoutes'); 
+const coursesRoutes = require('./routes/coursesRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 
@@ -43,7 +43,8 @@ app.use('/api/partners', partnerRoutes);
 app.use("/api/recruiters", recruiterRoutes);
 app.use('/api/highlights', highlightRoutes);
 app.use('/api/about', aboutRoutes);
-app.use('/api/v1/categories', categoryRoutes);
+app.use('/api/v1', coursesRoutes);
+
 
 app.get('/', (req, res) => res.send('Hero Slider API is running'));
 
