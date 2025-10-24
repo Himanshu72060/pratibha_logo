@@ -20,28 +20,30 @@ async function uploadToCloudinary(localPath, folder = 'courses') {
 
 exports.createCategory = async (req, res) => {
     try {
-        console.log("Uploaded file:", req.file);
+        console.log("File received:", req.file);
 
-        // ✅ Add this line right here 👇
+        // ✅ Get Cloudinary URL (multer-storage-cloudinary already uploads directly)
         const imageUrl = req.file?.path || req.file?.url;
 
-        // Optional: check if no image uploaded
         if (!imageUrl) {
             return res.status(400).json({ error: "Image file is required" });
         }
 
-        // Upload to Cloudinary (only if using local storage multer)
-        const result = await cloudinary.uploader.upload(imageUrl);
-
-        const category = await Category.create({
+        // ✅ Create new category document
+        const newCategory = await Category.create({
             name: req.body.name,
-            image: result.secure_url, // Cloudinary URL
+            image: imageUrl, // Cloudinary image URL
+            courses: [],     // start empty, you can add later
         });
 
-        res.status(201).json(category);
+        res.status(201).json({
+            success: true,
+            message: "Category created successfully",
+            data: newCategory,
+        });
     } catch (error) {
-        console.error("Create category error:", error);
-        res.status(500).json({ message: error.message });
+        console.error("Create Category Error:", error);
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
