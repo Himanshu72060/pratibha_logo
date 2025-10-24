@@ -22,18 +22,19 @@ exports.createCategory = async (req, res) => {
     try {
         console.log("File received:", req.file);
 
-        // ✅ Get Cloudinary URL (multer-storage-cloudinary already uploads directly)
+        // CloudinaryStorage uploads directly → req.file.path or req.file.url
         const imageUrl = req.file?.path || req.file?.url;
 
         if (!imageUrl) {
             return res.status(400).json({ error: "Image file is required" });
         }
 
-        // ✅ Create new category document
+        // Auto-generate id using Mongo ObjectId string
         const newCategory = await Category.create({
+            id: new Date().getTime().toString(), // unique numeric string id
             name: req.body.name,
-            image: imageUrl, // Cloudinary image URL
-            courses: [],     // start empty, you can add later
+            image: imageUrl,
+            courses: [], // initially empty, can add later
         });
 
         res.status(201).json({
