@@ -20,22 +20,28 @@ async function uploadToCloudinary(localPath, folder = 'courses') {
 
 exports.createCategory = async (req, res) => {
     try {
-        const { id, name } = req.body;
-        if (!id || !name) return res.status(400).json({ message: 'id and name required' });
+        console.log("Uploaded file:", req.file);
 
+        // ✅ Add this line right here 👇
+        const imageUrl = req.file?.path || req.file?.url;
 
-        let imageUrl = null;
-        if (req.file) {
-            const upload = await uploadToCloudinary(req.file.path, 'categories');
-            imageUrl = upload.url;
+        // Optional: check if no image uploaded
+        if (!imageUrl) {
+            return res.status(400).json({ error: "Image file is required" });
         }
 
+        // Upload to Cloudinary (only if using local storage multer)
+        const result = await cloudinary.uploader.upload(imageUrl);
 
-        const category = new Category({ id: Number(id), name, image: imageUrl, courses: [] });
-        await category.save();
-        res.status(201).json({ success: true, data: category });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+        const category = await Category.create({
+            name: req.body.name,
+            image: result.secure_url, // Cloudinary URL
+        });
+
+        res.status(201).json(category);
+    } catch (error) {
+        console.error("Create category error:", error);
+        res.status(500).json({ message: error.message });
     }
 };
 
